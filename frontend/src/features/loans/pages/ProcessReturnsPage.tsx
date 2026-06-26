@@ -1,40 +1,42 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import OverdueAlertList, { OverdueLoan } from '../components/OverdueAlertList';
 import FineCalculator from '../../../components/FineCalculator';
-
-const mockOverdueLoans: OverdueLoan[] = [
-  {
-    loanId: 101,
-    bookTitle: 'Clean Architecture',
-    memberCode: 'M-2891',
-    memberName: 'Nguyen Van A',
-    dueDate: '2026-06-10',
-    overdueDays: 9,
-  },
-  {
-    loanId: 102,
-    bookTitle: 'Design Patterns',
-    memberCode: 'M-1024',
-    memberName: 'Tran Thi B',
-    dueDate: '2026-06-15',
-    overdueDays: 4,
-  },
-];
+import { useOverdueLoans } from '../api/useOverdueLoans';
+import { useReturnBook } from '../api/useReturnBook';
 
 const ProcessReturnsPage: React.FC = () => {
   const [selectedLoanId, setSelectedLoanId] = useState<number | null>(null);
+  const { data: loans = [], isLoading, isError } = useOverdueLoans();
+  const returnBookMutation = useReturnBook();
+
+  const overdueLoans = useMemo<OverdueLoan[]>(
+    () =>
+      loans.map((loan) => ({
+        loanId: loan.id,
+        bookTitle: loan.bookTitle,
+        memberCode: loan.memberCode ?? 'UNKNOWN',
+        memberName: loan.memberCode ?? 'UNKNOWN',
+        dueDate: loan.dueDate,
+        overdueDays: loan.overdueDays ?? 0,
+      })),
+    [loans]
+  );
 
   const handleProcessFine = (loanId: number) => {
     setSelectedLoanId(loanId);
   };
 
-  const handleConfirmFine = (amount: number, reason: string) => {
-    console.log(`Processing fine for loan ${selectedLoanId}: ${amount} VND - ${reason}`);
-    alert(`Successfully processed fine of ${amount} VND.`);
-    setSelectedLoanId(null);
+  const handleConfirmFine = () => {
+    if (!selectedLoanId) {
+      return;
+    }
+
+    returnBookMutation.mutate(selectedLoanId, {
+      onSuccess: () => setSelectedLoanId(null),
+    });
   };
 
-  const selectedLoan = mockOverdueLoans.find((l) => l.loanId === selectedLoanId) || null;
+  const selectedLoan = overdueLoans.find((loan) => loan.loanId === selectedLoanId) || null;
 
   return (
     <div className="space-y-6">
@@ -45,9 +47,21 @@ const ProcessReturnsPage: React.FC = () => {
         </p>
       </div>
 
+      {isError && (
+        <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+          Failed to load overdue loans from the backend.
+        </div>
+      )}
+
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2">
-          <OverdueAlertList loans={mockOverdueLoans} onProcessFine={handleProcessFine} />
+          {isLoading ? (
+            <div className="rounded-lg border border-gray-200 bg-white p-8 text-center text-gray-500">
+              Loading overdue loans...
+            </div>
+          ) : (
+            <OverdueAlertList loans={overdueLoans} onProcessFine={handleProcessFine} />
+          )}
         </div>
 
         <div>

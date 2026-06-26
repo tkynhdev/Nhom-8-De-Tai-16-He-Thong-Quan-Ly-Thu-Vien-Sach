@@ -14,6 +14,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+/**
+ * Exposes public book-search endpoints with pagination and filters.
+ */
 @RestController
 @RequestMapping("/api/v1/books")
 @RequiredArgsConstructor

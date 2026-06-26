@@ -14,7 +14,8 @@ export const useBorrowBook = () => {
     mutationFn: borrowBook,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['books'] });
-      queryClient.invalidateQueries({ queryKey: ['loans'] });
+      queryClient.invalidateQueries({ queryKey: ['my-loans'] });
+      queryClient.invalidateQueries({ queryKey: ['book-copies'] });
     },
   });
 };

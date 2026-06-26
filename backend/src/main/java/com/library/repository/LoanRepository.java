@@ -1,9 +1,9 @@
 package com.library.repository;
 
-import com.library.entity.Loan;
-import com.library.enums.LoanStatus;
 import com.library.dto.MemberActivityResponse;
 import com.library.dto.PopularBookResponse;
+import com.library.entity.Loan;
+import com.library.enums.LoanStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
