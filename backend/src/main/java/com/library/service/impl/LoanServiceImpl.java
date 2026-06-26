@@ -25,10 +25,14 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 
+/**
+ * Implements the core borrow, return, fine, and renewal rules.
+ */
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -50,6 +54,10 @@ public class LoanServiceImpl implements LoanService {
     public Loan borrowBook(Long memberId, Long bookId) {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new ResourceNotFoundException("Member not found with ID: " + memberId));
+
+        if (member.getCardExpiryDate() != null && member.getCardExpiryDate().isBefore(LocalDate.now())) {
+            throw new BusinessRuleException("Member card has expired.");
+        }
 
         BookCopy availableCopy = bookCopyRepository.findFirstByBook_IdAndStatus(bookId, CopyStatus.AVAILABLE)
                 .orElseThrow(() -> new BookNotAvailableException("No available copies for book ID: " + bookId));
@@ -98,17 +106,22 @@ public class LoanServiceImpl implements LoanService {
         }
 
         BookCopy bookCopy = loan.getBookCopy();
-        bookCopy.setStatus(CopyStatus.AVAILABLE);
-        bookCopyRepository.save(bookCopy);
-        loanRepository.save(loan);
-
         Long bookId = bookCopy.getBook().getId();
         List<Reservation> pendingReservations = reservationRepository
                 .findByBook_IdAndStatusOrderByReservationDateAsc(bookId, ReservationStatus.PENDING);
 
         if (!pendingReservations.isEmpty()) {
+            Reservation nextReservation = pendingReservations.get(0);
+            nextReservation.setStatus(ReservationStatus.FULFILLED);
+            reservationRepository.save(nextReservation);
+            bookCopy.setStatus(CopyStatus.RESERVED);
             eventPublisher.publishEvent(new BookReturnedEvent(this, bookId, bookCopy.getId()));
+        } else {
+            bookCopy.setStatus(CopyStatus.AVAILABLE);
         }
+
+        bookCopyRepository.save(bookCopy);
+        loanRepository.save(loan);
 
         return loan;
     }
@@ -139,5 +152,15 @@ public class LoanServiceImpl implements LoanService {
         loan.setRenewalCount(loan.getRenewalCount() + 1);
 
         return loanRepository.save(loan);
+    }
+
+    @Override
+    public List<Loan> getLoansForMember(Long memberId) {
+        return loanRepository.findByMember_IdOrderByLoanDateDesc(memberId);
+    }
+
+    @Override
+    public List<Loan> getOverdueLoans() {
+        return loanRepository.findOverdueUnreturnedLoans();
     }
 }
