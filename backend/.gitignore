@@ -1,0 +1,27 @@
+HELP.md~
+
+# Maven
+target/
+.mvn/wrapper/dists/
+.mvn/wrapper/maven-wrapper.jar
+
+# Environment
+.env
+.env.*
+!.env.example
+
+# Logs
+*.log
+logs/
+
+# IDE
+.idea/
+*.iml
+.vscode/
+.settings/
+.classpath
+.project
+
+# OS
+.DS_Store
+Thumbs.db
