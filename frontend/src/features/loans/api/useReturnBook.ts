@@ -13,7 +13,10 @@ export const useReturnBook = () => {
   return useMutation({
     mutationFn: returnBook,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['loans'] });
+      queryClient.invalidateQueries({ queryKey: ['my-loans'] });
+      queryClient.invalidateQueries({ queryKey: ['overdue-loans'] });
+      queryClient.invalidateQueries({ queryKey: ['book-copies'] });
+      queryClient.invalidateQueries({ queryKey: ['statistics-overview'] });
       queryClient.invalidateQueries({ queryKey: ['books'] });
     },
   });

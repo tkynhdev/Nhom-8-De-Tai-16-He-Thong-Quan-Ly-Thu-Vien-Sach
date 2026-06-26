@@ -1,18 +1,18 @@
 import React from 'react';
 import { BookSearchResponse } from '../types/api';
-import LoanStatusBadge from './LoanStatusBadge';
 
 interface BookCardProps {
   book: BookSearchResponse;
-  onActionClick?: (bookId: number) => void;
+  onBorrowClick?: (bookId: number) => void;
+  onReserveClick?: (bookId: number) => void;
 }
 
-const BookCard: React.FC<BookCardProps> = ({ book, onActionClick }) => {
+const BookCard: React.FC<BookCardProps> = ({ book, onBorrowClick, onReserveClick }) => {
   const isAvailable = book.availableCopies > 0;
 
   return (
     <div className="flex flex-col bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300">
-      {/* Giả lập ảnh bìa do DB chưa lưu URL ảnh */}
+      {/* Placeholder cover because the current schema does not store image URLs yet. */}
       <div className="h-48 bg-slate-200 flex items-center justify-center text-slate-400">
         <svg
           className="w-12 h-12"
@@ -43,14 +43,14 @@ const BookCard: React.FC<BookCardProps> = ({ book, onActionClick }) => {
           <span className="bg-blue-50 text-blue-700 px-2 py-1 rounded">{book.category}</span>
           <span>ISBN: {book.isbn}</span>
         </div>
-        {onActionClick && (
+        {(onBorrowClick || onReserveClick) && (
           <button
-            onClick={() => onActionClick(book.id)}
-            disabled={!isAvailable}
+            onClick={() => (isAvailable ? onBorrowClick?.(book.id) : onReserveClick?.(book.id))}
+            disabled={isAvailable ? !onBorrowClick : !onReserveClick}
             className={`mt-4 w-full py-2 rounded font-medium transition-colors ${
               isAvailable
                 ? 'bg-blue-600 hover:bg-blue-700 text-white'
-                : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                : 'bg-orange-600 hover:bg-orange-700 text-white'
             }`}
           >
             {isAvailable ? 'Borrow Now' : 'Join Waitlist'}
