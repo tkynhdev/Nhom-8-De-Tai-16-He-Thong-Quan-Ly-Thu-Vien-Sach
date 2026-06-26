@@ -1,39 +1,10 @@
 import React from 'react';
 import BookCopyTable from '../../../components/BookCopyTable';
-import { BookCopyData } from '../../../types/api';
-
-const mockCopies: BookCopyData[] = [
-  {
-    id: 1,
-    copyCode: 'C-82910',
-    status: 'AVAILABLE',
-    shelfLocation: 'A1-01',
-    bookTitle: 'Spring Boot in Action',
-  },
-  {
-    id: 2,
-    copyCode: 'C-82911',
-    status: 'LOANED',
-    shelfLocation: 'A1-01',
-    bookTitle: 'Spring Boot in Action',
-  },
-  {
-    id: 3,
-    copyCode: 'C-10294',
-    status: 'RESERVED',
-    shelfLocation: 'B2-04',
-    bookTitle: 'Clean Architecture',
-  },
-  {
-    id: 4,
-    copyCode: 'C-10295',
-    status: 'LOST',
-    shelfLocation: null,
-    bookTitle: 'Clean Architecture',
-  },
-];
+import { useBookCopies } from '../api/useBookCopies';
 
 const InventoryPage: React.FC = () => {
+  const { data: copies = [], isLoading, isError } = useBookCopies();
+
   const handleEditStatus = (id: number) => {
     console.log('Trigger edit modal for copy ID:', id);
   };
@@ -65,7 +36,13 @@ const InventoryPage: React.FC = () => {
       </div>
 
       <div>
-        <BookCopyTable copies={mockCopies} onEditStatus={handleEditStatus} />
+        {isError ? (
+          <div className="rounded-lg border border-red-200 bg-red-50 p-6 text-sm text-red-700">
+            Failed to load book-copy inventory.
+          </div>
+        ) : (
+          <BookCopyTable copies={copies} onEditStatus={handleEditStatus} isLoading={isLoading} />
+        )}
       </div>
     </div>
   );

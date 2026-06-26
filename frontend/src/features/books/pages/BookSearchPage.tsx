@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useBooks } from '../../books/api/useBooks';
 import { useBorrowBook } from '../../loans/api/useBorrowBook';
+import { useReserveBook } from '../../reservations/api/useReserveBook';
 import BookCard from '../../../components/BookCard';
 
 interface SearchFormInputs {
@@ -15,6 +16,7 @@ const BookSearchPage: React.FC = () => {
 
   const { data: booksData, isLoading, isError } = useBooks(searchParams);
   const borrowBookMutation = useBorrowBook();
+  const reserveBookMutation = useReserveBook();
 
   const onSubmit = (data: SearchFormInputs) => {
     setSearchParams((prev) => ({
@@ -32,6 +34,19 @@ const BookSearchPage: React.FC = () => {
         {
           onSuccess: () => alert('Book borrowed successfully!'),
           onError: (error: any) => alert(error.response?.data?.message || 'Failed to borrow book'),
+        }
+      );
+    }
+  };
+
+  const handleReserve = (bookId: number) => {
+    if (window.confirm('This book has no available copies. Do you want to join the waitlist?')) {
+      reserveBookMutation.mutate(
+        { bookId },
+        {
+          onSuccess: () => alert('Reservation created successfully!'),
+          onError: (error: any) =>
+            alert(error.response?.data?.message || 'Failed to create reservation'),
         }
       );
     }
@@ -87,7 +102,12 @@ const BookSearchPage: React.FC = () => {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
         {booksData?.content.map((book) => (
-          <BookCard key={book.id} book={book} onActionClick={handleBorrow} />
+          <BookCard
+            key={book.id}
+            book={book}
+            onBorrowClick={handleBorrow}
+            onReserveClick={handleReserve}
+          />
         ))}
       </div>
 
