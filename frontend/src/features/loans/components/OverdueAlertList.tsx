@@ -16,89 +16,53 @@ interface OverdueAlertListProps {
 }
 
 const OverdueAlertList: React.FC<OverdueAlertListProps> = ({ loans, onProcessFine }) => {
-  const sortedLoans = useMemo(() => {
-    return [...loans].sort((a, b) => b.overdueDays - a.overdueDays);
-  }, [loans]);
+  const sortedLoans = useMemo(
+    () => [...loans].sort((a, b) => b.overdueDays - a.overdueDays),
+    [loans]
+  );
 
   return (
-    <div className="bg-white rounded-lg shadow overflow-hidden border border-red-100">
-      <div className="px-4 py-5 sm:px-6 bg-red-50 border-b border-red-100 flex justify-between items-center">
+    <div className="alert-card">
+      <div className="alert-header">
         <div>
-          <h3 className="text-lg leading-6 font-medium text-red-800 flex items-center">
-            <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
-              />
-            </svg>
-            Overdue Books Alert
-          </h3>
-          <p className="mt-1 max-w-2xl text-sm text-red-600">
-            Action required: {sortedLoans.length} items are currently overdue.
+          <p className="section-kicker">Cần chú ý</p>
+          <h3 className="panel-title">Sách quá hạn</h3>
+          <p className="panel-description">
+            Đang có {sortedLoans.length} phiếu mượn cần xử lý quá hạn.
           </p>
         </div>
+        <LoanStatusBadge status="OVERDUE" />
       </div>
 
       {sortedLoans.length === 0 ? (
-        <div className="p-6 text-center text-gray-500">Hooray! No overdue books at the moment.</div>
+        <div className="state-card border-accent-100 bg-accent-50 text-accent-700">
+          <div className="state-icon text-accent-600"></div>
+          <h3 className="text-accent-800">Không có sách quá hạn</h3>
+          <p className="text-accent-600">Tất cả phiếu mượn đang trong thời hạn cho phép.</p>
+        </div>
       ) : (
-        <ul className="divide-y divide-gray-200">
+        <ul className="alert-list divide-y divide-red-100">
           {sortedLoans.map((loan) => (
-            <li key={loan.loanId} className="hover:bg-gray-50 transition-colors">
-              <div className="px-4 py-4 sm:px-6 flex items-center justify-between">
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center justify-between">
-                    <p className="text-sm font-bold text-gray-900 truncate">{loan.bookTitle}</p>
-                    <div className="ml-2 flex-shrink-0 flex">
-                      <LoanStatusBadge status="OVERDUE" />
-                    </div>
-                  </div>
-                  <div className="mt-2 flex justify-between">
-                    <div className="sm:flex">
-                      <div className="flex items-center text-sm text-gray-500">
-                        <svg
-                          className="flex-shrink-0 mr-1.5 h-4 w-4 text-gray-400"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth="2"
-                            d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-                          />
-                        </svg>
-                        {loan.memberName} ({loan.memberCode})
-                      </div>
-                      <div className="mt-2 flex items-center text-sm text-red-600 sm:mt-0 sm:ml-6 font-medium">
-                        <svg
-                          className="flex-shrink-0 mr-1.5 h-4 w-4 text-red-500"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth="2"
-                            d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-                          />
-                        </svg>
-                        {loan.overdueDays} days late
-                      </div>
-                    </div>
-                    {onProcessFine && (
-                      <button
-                        onClick={() => onProcessFine(loan.loanId)}
-                        className="inline-flex items-center px-3 py-1 border border-transparent text-xs font-medium rounded shadow-sm text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
-                      >
-                        Process Fine
-                      </button>
-                    )}
-                  </div>
+            <li key={loan.loanId} className="p-4 hover:bg-red-50/50 transition-colors">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div>
+                  <p className="font-bold text-ink-900">{loan.bookTitle}</p>
+                  <p className="mt-1 text-sm text-ink-600">
+                    <span className="font-semibold text-ink-800">{loan.memberName}</span> ({loan.memberCode}) - Hạn trả: {new Date(loan.dueDate).toLocaleDateString('vi-VN')}
+                  </p>
+                </div>
+                <div className="flex items-center gap-3 shrink-0">
+                  <span className="inline-flex rounded-full bg-red-100 px-2.5 py-1 text-xs font-bold text-red-700">
+                    Trễ {loan.overdueDays} ngày
+                  </span>
+                  {onProcessFine && (
+                    <button
+                      className="btn-danger py-1.5 px-3 text-xs"
+                      type="button" onClick={() => onProcessFine(loan.loanId)}
+                    >
+                      Xử lý phạt
+                    </button>
+                  )}
                 </div>
               </div>
             </li>

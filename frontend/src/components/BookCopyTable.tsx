@@ -4,78 +4,88 @@ import { BookCopyData } from '../types/api';
 
 interface BookCopyTableProps {
   copies: BookCopyData[];
-  onEditStatus?: (id: number) => void;
+  onEdit?: (copy: BookCopyData) => void;
+  onDelete?: (copy: BookCopyData) => void;
   isLoading?: boolean;
 }
 
 const BookCopyTable: React.FC<BookCopyTableProps> = ({
   copies,
-  onEditStatus,
+  onEdit,
+  onDelete,
   isLoading = false,
 }) => {
   if (isLoading) {
     return (
-      <div className="text-center py-10 text-gray-500 animate-pulse">Loading copies data...</div>
+      <div className="state-card">
+        <div className="mx-auto mb-4 h-10 w-10 animate-spin rounded-full border-4 border-primary-100 border-t-primary-600" />
+        <p className="text-sm text-ink-500">Đang tải danh sách bản sao...</p>
+      </div>
     );
   }
 
   if (!copies.length) {
     return (
-      <div className="text-center py-10 text-gray-500 bg-gray-50 rounded-lg border border-dashed border-gray-300">
-        No copies found in the database.
+      <div className="state-card">
+        <div className="state-icon text-xl"></div>
+        <h3 className="text-lg font-bold text-ink-900">Kho sách trống</h3>
+        <p className="mt-1 text-sm text-ink-500">Chưa có bản sao vật lý nào được thêm vào kho.</p>
       </div>
     );
   }
 
   return (
-    <div className="overflow-x-auto shadow ring-1 ring-black ring-opacity-5 md:rounded-lg">
-      <table className="min-w-full divide-y divide-gray-300">
-        <thead className="bg-gray-50">
+    <div className="table-wrap">
+      <table className="data-table">
+        <thead>
           <tr>
-            <th
-              scope="col"
-              className="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6"
-            >
-              Copy Code
-            </th>
-            <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
-              Book Title
-            </th>
-            <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
-              Shelf Location
-            </th>
-            <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
-              Status
-            </th>
-            <th scope="col" className="relative py-3.5 pl-3 pr-4 sm:pr-6">
-              <span className="sr-only">Actions</span>
-            </th>
+            <th>Mã vạch / Copy Code</th>
+            <th>Tên sách</th>
+            <th>Vị trí kệ</th>
+            <th>Trạng thái</th>
+            <th className="text-right">Hành động</th>
           </tr>
         </thead>
-        <tbody className="divide-y divide-gray-200 bg-white">
+        <tbody>
           {copies.map((copy) => (
-            <tr key={copy.id} className="hover:bg-gray-50 transition-colors">
-              <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6">
-                {copy.copyCode}
+            <tr key={copy.id}>
+              <td>
+                <span className="inline-block rounded-md border border-primary-100 bg-primary-50 px-2 py-1 font-mono text-sm font-bold text-primary-700">
+                  {copy.copyCode}
+                </span>
               </td>
-              <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                {copy.bookTitle}
+              <td className="font-bold text-ink-900 line-clamp-2 min-w-[200px]">{copy.bookTitle}</td>
+              <td>
+                {copy.shelfLocation ? (
+                  <span className="rounded-md bg-slate-100 px-2 py-1 font-mono text-sm font-semibold text-ink-600">
+                    {copy.shelfLocation}
+                  </span>
+                ) : (
+                  <span className="text-sm italic text-ink-500">Chưa xếp kệ</span>
+                )}
               </td>
-              <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                {copy.shelfLocation || <span className="text-gray-400 italic">Not assigned</span>}
-              </td>
-              <td className="whitespace-nowrap px-3 py-4 text-sm">
+              <td>
                 <LoanStatusBadge status={copy.status} />
               </td>
-              <td className="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
-                {onEditStatus && (
-                  <button
-                    onClick={() => onEditStatus(copy.id)}
-                    className="text-blue-600 hover:text-blue-900"
-                  >
-                    Edit Status<span className="sr-only">, {copy.copyCode}</span>
-                  </button>
-                )}
+              <td>
+                <div className="flex justify-end gap-1.5">
+                  {onEdit && (
+                    <button
+                      className="rounded-lg border border-border px-2.5 py-1 text-xs font-semibold text-ink-700 hover:bg-primary-50 hover:text-primary-700 transition-colors"
+                      type="button" onClick={() => onEdit(copy)}
+                    >
+                       Sửa
+                    </button>
+                  )}
+                  {onDelete && (
+                    <button
+                      className="rounded-lg border border-red-200 px-2.5 py-1 text-xs font-semibold text-red-600 hover:bg-red-50 transition-colors"
+                      type="button" onClick={() => onDelete(copy)}
+                    >
+                      
+                    </button>
+                  )}
+                </div>
               </td>
             </tr>
           ))}
