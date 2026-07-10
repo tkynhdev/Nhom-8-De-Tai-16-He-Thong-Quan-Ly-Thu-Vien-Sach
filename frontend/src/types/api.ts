@@ -41,8 +41,6 @@ export interface LoanResponse {
   returnDate: string | null;
   status: 'ACTIVE' | 'RETURNED' | 'OVERDUE';
   renewalCount: number;
-  overdueDays?: number | null;
-  fineAmount?: number | null;
 }
 
 export interface BookCopyData {
@@ -104,22 +102,9 @@ export interface ReservationResponse {
   status: 'PENDING' | 'FULFILLED' | 'CANCELLED' | string;
 }
 
-export interface PopularBookResponse {
-  title: string;
-  borrowCount: number;
-}
-
-export interface MemberActivityResponse {
-  memberCode: string;
-  fullName: string;
-  loanCount: number;
-}
-
 export interface StatisticsOverviewResponse {
-  totalActiveLoans: number;
-  totalOverdue: number;
+  activeLoans: number;
+  overdueBooks: number;
   availableCopies: number;
-  monthlyFinesCollected: number;
-  popularBooks: PopularBookResponse[];
-  topMembers: MemberActivityResponse[];
+  finesCollected: number;
 }
