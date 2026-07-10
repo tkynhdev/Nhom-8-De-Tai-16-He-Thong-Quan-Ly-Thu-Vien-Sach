@@ -27,8 +27,8 @@ const LoanDetailPage: React.FC = () => {
 
   const loan = loans?.find((l) => l.id === Number(loanId));
   const overdue = loan ? isOverdue(loan.dueDate, loan.status) && loan.status !== 'RETURNED' : false;
-  const fineDays = loan && overdue ? calcFineDays(loan.dueDate) : 0;
-  const fineAmount = fineDays * 1000;
+  const fineDays = loan?.overdueDays ?? (loan && overdue ? calcFineDays(loan.dueDate) : 0);
+  const fineAmount = loan?.fineAmount ?? (fineDays * 5000);
 
   const handleRenew = () => {
     if (!loan) return;
@@ -82,7 +82,7 @@ const LoanDetailPage: React.FC = () => {
           <div>
             <p className="font-bold text-red-700">Sách đã quá hạn {fineDays} ngày!</p>
             <p className="mt-1 text-sm text-red-600">
-              Phí phạt hiện tại: <span className="font-black">{fineAmount.toLocaleString('vi-VN')}đ</span> (1.000đ/ngày). Vui lòng trả sách ngay để tránh phát sinh thêm.
+              Phí phạt hiện tại: <span className="font-black">{fineAmount.toLocaleString('vi-VN')}đ</span> (5.000đ/ngày). Vui lòng trả sách ngay để tránh phát sinh thêm.
             </p>
           </div>
         </div>
@@ -137,7 +137,7 @@ const LoanDetailPage: React.FC = () => {
               </div>
               <div className="flex justify-between">
                 <span className="text-ink-500">Đơn giá phạt</span>
-                <span className="font-semibold text-ink-900">1.000đ/ngày</span>
+                <span className="font-semibold text-ink-900">5.000đ/ngày</span>
               </div>
               <div className="border-t border-border pt-3">
                 <div className="flex justify-between">

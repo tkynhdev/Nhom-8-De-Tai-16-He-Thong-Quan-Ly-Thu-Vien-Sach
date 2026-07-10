@@ -27,6 +27,19 @@ public class AuthController {
 
     private final MemberRepository memberRepository;
     private final JwtUtils jwtUtils;
+    private final com.library.service.MemberService memberService;
+
+    /**
+     * Registers a new member.
+     */
+    @PostMapping("/register")
+    public ResponseEntity<AuthResponse> register(@Valid @RequestBody com.library.dto.MemberRequest request) {
+        memberService.createMember(request);
+        Member member = memberRepository.findByMemberCode(request.getMemberCode())
+                .orElseThrow(() -> new ResourceNotFoundException("Member not found after creation"));
+        UserDetails principal = MemberPrincipal.fromMember(member);
+        return ResponseEntity.ok(buildAuthResponse(member, principal));
+    }
 
     /**
      * Logs a member in using the member code and returns both tokens.

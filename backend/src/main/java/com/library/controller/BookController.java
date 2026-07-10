@@ -25,17 +25,15 @@ public class BookController {
 
     private final BookService bookService;
 
-    @Operation(summary = "Search books", description = "Search books by title, author, category, or ISBN with pagination")
+    @Operation(summary = "Search books", description = "Search books by keyword (title, author, isbn) and category with pagination")
     @GetMapping("/search")
     public ResponseEntity<Page<BookSearchResponse>> searchBooks(
-            @Parameter(description = "Book Title") @RequestParam(required = false) String title,
-            @Parameter(description = "Author Name") @RequestParam(required = false) String author,
+            @Parameter(description = "Search Keyword") @RequestParam(required = false) String keyword,
             @Parameter(description = "Category") @RequestParam(required = false) String category,
-            @Parameter(description = "ISBN Code") @RequestParam(required = false) String isbn,
             @Parameter(description = "Page number (0-based)") @RequestParam(defaultValue = "0") int page,
             @Parameter(description = "Page size") @RequestParam(defaultValue = "10") int size) {
 
-        Page<BookSearchResponse> result = bookService.searchBooks(title, author, category, isbn, PageRequest.of(page, size));
+        Page<BookSearchResponse> result = bookService.searchBooks(keyword, category, PageRequest.of(page, size));
         return ResponseEntity.ok(result);
     }
 

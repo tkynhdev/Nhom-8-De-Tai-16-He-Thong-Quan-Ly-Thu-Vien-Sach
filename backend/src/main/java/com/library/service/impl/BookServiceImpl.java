@@ -26,12 +26,10 @@ public class BookServiceImpl implements BookService {
     private final BookCopyRepository bookCopyRepository;
 
     @Override
-    public Page<BookSearchResponse> searchBooks(String title, String author, String category, String isbn, Pageable pageable) {
-        title = title == null ? "" : title;
-        author = author == null ? "" : author;
+    public Page<BookSearchResponse> searchBooks(String keyword, String category, Pageable pageable) {
+        keyword = keyword == null ? "" : keyword;
         category = category == null ? "" : category;
-        isbn = isbn == null ? "" : isbn;
-        List<Book> books = bookRepository.searchBooks(title, author, category, isbn);
+        List<Book> books = bookRepository.searchBooksByKeyword(keyword, category);
         int start = (int) pageable.getOffset();
         if (start >= books.size()) {
             return new PageImpl<>(List.of(), pageable, books.size());

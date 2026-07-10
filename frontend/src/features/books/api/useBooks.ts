@@ -3,10 +3,8 @@ import apiClient from '../../../lib/apiClient';
 import { PaginatedResponse, BookSearchResponse } from '../../../types/api';
 
 interface UseBooksParams {
-  title?: string;
-  author?: string;
+  keyword?: string;
   category?: string;
-  isbn?: string;
   page?: number;
   size?: number;
 }

@@ -41,6 +41,8 @@ export interface LoanResponse {
   returnDate: string | null;
   status: 'ACTIVE' | 'RETURNED' | 'OVERDUE';
   renewalCount: number;
+  overdueDays?: number;
+  fineAmount?: number;
 }
 
 export interface BookCopyData {

@@ -30,7 +30,7 @@ const SORT_OPTIONS = [
 ];
 
 const BookSearchPage: React.FC = () => {
-  const [searchParams, setSearchParams] = useState({ title: '', category: '', page: 0, size: 50 });
+  const [searchParams, setSearchParams] = useState({ keyword: '', category: '', page: 0, size: 50 });
   const [selectedCategory, setSelectedCategory] = useState('');
   const [sortBy, setSortBy] = useState('default');
   const [statusFilter, setStatusFilter] = useState<'all' | 'available'>('all');
@@ -66,7 +66,7 @@ const BookSearchPage: React.FC = () => {
   };
 
   const onSubmit = (data: SearchFormInputs) => {
-    setSearchParams({ title: data.keyword.trim(), category: selectedCategory || data.category.trim(), page: 0, size: 50 });
+    setSearchParams({ keyword: data.keyword.trim(), category: selectedCategory || data.category?.trim() || '', page: 0, size: 50 });
     setMessage('');
   };
 
@@ -80,7 +80,7 @@ const BookSearchPage: React.FC = () => {
     setSelectedCategory('');
     setSortBy('default');
     setStatusFilter('all');
-    setSearchParams({ title: '', category: '', page: 0, size: 50 });
+    setSearchParams({ keyword: '', category: '', page: 0, size: 50 });
     reset();
   };
 

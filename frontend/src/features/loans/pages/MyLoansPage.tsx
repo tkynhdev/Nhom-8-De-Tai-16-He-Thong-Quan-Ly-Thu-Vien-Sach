@@ -21,9 +21,12 @@ const formatDate = (dateStr: string) =>
 const isOverdue = (dueDate: string, status: string) =>
   status === 'OVERDUE' || (status !== 'RETURNED' && new Date(dueDate) < new Date());
 
-const calcFine = (dueDate: string) => {
-  const days = Math.max(0, Math.floor((Date.now() - new Date(dueDate).getTime()) / 86400000));
-  return days > 0 ? `${(days * 1000).toLocaleString('vi-VN')}đ` : null;
+const calcFine = (loan: any) => {
+  if (loan.fineAmount !== undefined && loan.fineAmount !== null) {
+    return loan.fineAmount > 0 ? `${loan.fineAmount.toLocaleString('vi-VN')}đ` : null;
+  }
+  const days = loan.overdueDays ?? Math.max(0, Math.floor((Date.now() - new Date(loan.dueDate).getTime()) / 86400000));
+  return days > 0 ? `${(days * 5000).toLocaleString('vi-VN')}đ` : null;
 };
 
 const MyLoansPage: React.FC = () => {
@@ -205,7 +208,7 @@ const MyLoansPage: React.FC = () => {
               <tbody>
                 {filteredLoans.map((loan) => {
                   const overdue = isOverdue(loan.dueDate, loan.status);
-                  const fine = overdue && loan.status !== 'RETURNED' ? calcFine(loan.dueDate) : null;
+                  const fine = overdue && loan.status !== 'RETURNED' ? calcFine(loan) : null;
                   return (
                     <tr key={loan.id} className={overdue && loan.status !== 'RETURNED' ? 'bg-red-50/50' : ''}>
                       <td>
