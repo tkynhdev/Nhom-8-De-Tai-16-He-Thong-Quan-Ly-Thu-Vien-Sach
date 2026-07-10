@@ -26,7 +26,7 @@ const FineCalculator: React.FC<FineCalculatorProps> = ({
   } = useForm<FineFormInputs>({
     defaultValues: {
       overdueDays: Math.max(0, initialOverdueDays),
-      reason: initialOverdueDays > 0 ? `Overdue for ${initialOverdueDays} days` : '',
+      reason: initialOverdueDays > 0 ? `Phạt quá hạn ${initialOverdueDays} ngày` : '',
     },
   });
 
@@ -35,9 +35,9 @@ const FineCalculator: React.FC<FineCalculatorProps> = ({
 
   useEffect(() => {
     if (watchDays > 0) {
-      setValue('reason', `Overdue for ${watchDays} days`);
+      setValue('reason', `Phạt quá hạn ${watchDays} ngày`);
     } else {
-      setValue('reason', 'No fine needed');
+      setValue('reason', 'Không cần nộp phạt');
     }
   }, [watchDays, setValue]);
 
@@ -48,83 +48,52 @@ const FineCalculator: React.FC<FineCalculatorProps> = ({
   };
 
   return (
-    <div className="bg-white p-6 rounded-lg shadow border border-gray-200 w-full max-w-md">
-      <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center">
-        <svg
-          className="w-5 h-5 mr-2 text-red-500"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth="2"
-            d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-          />
-        </svg>
-        Fine Calculator
-      </h3>
-
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+    <div className="panel border-red-200">
+      <div className="panel-header border-b border-red-100 bg-red-50 p-4 rounded-t-xl">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Overdue Days</label>
+          <p className="section-kicker text-red-600">Công cụ tính phí</p>
+          <h3 className="panel-title text-red-800">Tính tiền phạt</h3>
+          <p className="panel-description text-red-700">Tự động tính phí dựa trên số ngày trễ hạn.</p>
+        </div>
+      </div>
+
+      <form onSubmit={handleSubmit(onSubmit)} className="p-4 space-y-4">
+        <div>
+          <label className="form-label">Số ngày quá hạn</label>
           <Controller
             name="overdueDays"
             control={control}
-            rules={{ min: { value: 0, message: 'Days cannot be negative' } }}
-            render={({ field }) => (
-              <input
-                {...field}
-                type="number"
-                min="0"
-                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-              />
-            )}
+            rules={{ min: { value: 0, message: 'Số ngày không thể âm' } }}
+            render={({ field }) => <input {...field} type="number" min="0" className="input-field" />}
           />
-          {errors.overdueDays && (
-            <p className="mt-1 text-sm text-red-600">{errors.overdueDays.message}</p>
-          )}
+          {errors.overdueDays && <p className="mt-1 text-xs font-semibold text-red-600">{errors.overdueDays.message}</p>}
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Reason</label>
+          <label className="form-label">Lý do thu tiền</label>
           <Controller
             name="reason"
             control={control}
-            rules={{ required: watchDays > 0 ? 'Reason is required' : false }}
+            rules={{ required: watchDays > 0 ? 'Vui lòng nhập lý do' : false }}
             render={({ field }) => (
-              <input
-                {...field}
-                type="text"
-                disabled={watchDays === 0}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm disabled:bg-gray-100 disabled:text-gray-500"
-              />
+              <input {...field} type="text" disabled={watchDays === 0} className="input-field" />
             )}
           />
-          {errors.reason && <p className="mt-1 text-sm text-red-600">{errors.reason.message}</p>}
+          {errors.reason && <p className="mt-1 text-xs font-semibold text-red-600">{errors.reason.message}</p>}
         </div>
 
-        <div className="bg-gray-50 p-4 rounded-md border border-gray-200 mt-4">
-          <div className="flex justify-between items-center">
-            <span className="text-gray-600 font-medium">Total Fine:</span>
-            <span className="text-2xl font-bold text-red-600">
-              {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(
-                totalFine
-              )}
+        <div className="rounded-xl bg-slate-50 p-4">
+          <div className="flex items-center justify-between">
+            <span className="font-semibold text-ink-600">Tổng tiền phạt:</span>
+            <span className="text-2xl font-black text-red-600">
+              {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(totalFine)}
             </span>
           </div>
-          <p className="text-xs text-gray-400 text-right mt-1">
-            Rate: {baseRatePerDay.toLocaleString()} VND/day
-          </p>
+          <p className="mt-1 text-right text-xs text-ink-500">Mức phí: {baseRatePerDay.toLocaleString('vi-VN')} đ/ngày</p>
         </div>
 
-        <button
-          type="submit"
-          disabled={watchDays <= 0}
-          className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 disabled:bg-gray-400 disabled:cursor-not-allowed"
-        >
-          Confirm Fine Creation
+        <button type="submit" disabled={watchDays <= 0} className="btn-danger w-full justify-center py-2.5 text-base">
+          Xác nhận tạo biên lai phạt
         </button>
       </form>
     </div>

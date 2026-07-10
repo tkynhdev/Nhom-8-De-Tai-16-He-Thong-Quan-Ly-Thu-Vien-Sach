@@ -3,7 +3,7 @@ import apiClient from '../../../lib/apiClient';
 import { BorrowRequest, LoanResponse } from '../../../types/api';
 
 const borrowBook = async (payload: BorrowRequest): Promise<LoanResponse> => {
-  const { data } = await apiClient.post('/loans/borrow', payload);
+  const { data } = await apiClient.post('/member/loans/borrow', payload);
   return data;
 };
 
@@ -14,7 +14,7 @@ export const useBorrowBook = () => {
     mutationFn: borrowBook,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['books'] });
-      queryClient.invalidateQueries({ queryKey: ['loans'] });
+      queryClient.invalidateQueries({ queryKey: ['my-loans'] });
     },
   });
 };
