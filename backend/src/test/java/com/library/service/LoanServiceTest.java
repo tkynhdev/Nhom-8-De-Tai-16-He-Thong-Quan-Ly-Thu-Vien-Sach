@@ -115,6 +115,8 @@ public class LoanServiceTest {
     void testReturnBook_Success_Overdue() {
         testLoan.setDueDate(LocalDateTime.now().minusDays(5));
         when(loanRepository.findByIdWithDetails(300L)).thenReturn(Optional.of(testLoan));
+        when(reservationRepository.findByBook_IdAndStatusOrderByReservationDateAsc(100L, ReservationStatus.PENDING))
+                .thenReturn(Collections.emptyList());
 
         loanService.returnBook(300L);
 
