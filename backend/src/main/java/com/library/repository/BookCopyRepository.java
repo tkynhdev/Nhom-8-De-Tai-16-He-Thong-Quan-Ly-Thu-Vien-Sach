@@ -24,4 +24,6 @@ public interface BookCopyRepository extends JpaRepository<BookCopy, Long> {
 
     @Query("SELECT bc FROM BookCopy bc JOIN FETCH bc.book ORDER BY bc.updatedAt DESC")
     List<BookCopy> findAllWithBookOrderByUpdatedAtDesc();
+    
+    Optional<BookCopy> findByCopyCode(String copyCode);
 }

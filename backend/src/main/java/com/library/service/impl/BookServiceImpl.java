@@ -27,6 +27,10 @@ public class BookServiceImpl implements BookService {
 
     @Override
     public Page<BookSearchResponse> searchBooks(String title, String author, String category, String isbn, Pageable pageable) {
+        title = title == null ? "" : title;
+        author = author == null ? "" : author;
+        category = category == null ? "" : category;
+        isbn = isbn == null ? "" : isbn;
         List<Book> books = bookRepository.searchBooks(title, author, category, isbn);
         int start = (int) pageable.getOffset();
         if (start >= books.size()) {
@@ -40,9 +44,79 @@ public class BookServiceImpl implements BookService {
                         .title(book.getTitle())
                         .author(book.getAuthor())
                         .category(book.getCategory())
+                        .coverUrl(book.getCoverUrl())
                         .availableCopies(bookCopyRepository.countByBook_IdAndStatus(book.getId(), CopyStatus.AVAILABLE))
                         .build())
                 .collect(Collectors.toList());
         return new PageImpl<>(content, pageable, books.size());
+    }
+
+    @Override
+    public BookSearchResponse createBook(com.library.dto.BookRequest request) {
+        if (bookRepository.findByIsbn(request.getIsbn()).isPresent()) {
+            throw new com.library.exception.BusinessRuleException("ISBN already exists");
+        }
+        
+        Book book = Book.builder()
+                .isbn(request.getIsbn())
+                .title(request.getTitle())
+                .author(request.getAuthor())
+                .category(request.getCategory())
+                .publisher(request.getPublisher())
+                .description(request.getDescription())
+                .coverUrl(request.getCoverUrl())
+                .build();
+                
+        book = bookRepository.save(book);
+        
+        return BookSearchResponse.builder()
+                .id(book.getId())
+                .isbn(book.getIsbn())
+                .title(book.getTitle())
+                .author(book.getAuthor())
+                .category(book.getCategory())
+                .coverUrl(book.getCoverUrl())
+                .availableCopies(0L)
+                .build();
+    }
+
+    @Override
+    public BookSearchResponse updateBook(Long id, com.library.dto.BookRequest request) {
+        Book book = bookRepository.findById(id)
+                .orElseThrow(() -> new com.library.exception.ResourceNotFoundException("Book not found"));
+                
+        // Check ISBN uniqueness if changed
+        if (!book.getIsbn().equals(request.getIsbn()) && 
+            bookRepository.findByIsbn(request.getIsbn()).isPresent()) {
+            throw new com.library.exception.BusinessRuleException("ISBN already exists");
+        }
+        
+        book.setIsbn(request.getIsbn());
+        book.setTitle(request.getTitle());
+        book.setAuthor(request.getAuthor());
+        book.setCategory(request.getCategory());
+        book.setPublisher(request.getPublisher());
+        book.setDescription(request.getDescription());
+        book.setCoverUrl(request.getCoverUrl());
+        
+        book = bookRepository.save(book);
+        
+        return BookSearchResponse.builder()
+                .id(book.getId())
+                .isbn(book.getIsbn())
+                .title(book.getTitle())
+                .author(book.getAuthor())
+                .category(book.getCategory())
+                .coverUrl(book.getCoverUrl())
+                .availableCopies(bookCopyRepository.countByBook_IdAndStatus(book.getId(), CopyStatus.AVAILABLE))
+                .build();
+    }
+
+    @Override
+    public void deleteBook(Long id) {
+        if (!bookRepository.existsById(id)) {
+            throw new com.library.exception.ResourceNotFoundException("Book not found");
+        }
+        bookRepository.deleteById(id);
     }
 }

@@ -14,4 +14,6 @@ public interface ReservationService {
     List<Reservation> getReservationsForMember(Long memberId);
 
     Reservation cancelReservation(Long reservationId, Long memberId);
+    
+    List<Reservation> getPendingReservations();
 }

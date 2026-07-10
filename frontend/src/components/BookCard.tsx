@@ -11,27 +11,32 @@ interface BookCardProps {
 }
 
 export const BookCover = ({ book, large = false }: { book: BookSearchResponse; large?: boolean }) => (
-  <div className={`relative overflow-hidden rounded-lg border border-primary-100 bg-primary-700 ${large ? 'min-h-96' : 'min-h-56'}`}>
+  <div className={`relative overflow-hidden rounded-xl bg-gradient-to-br from-primary-800 to-indigo-900 shadow-inner group-hover:shadow-glow transition-all duration-300 ${large ? 'min-h-[400px]' : 'min-h-[260px]'}`}>
     {book.coverUrl ? (
       <img
-        className="absolute inset-0 h-full w-full object-cover"
+        className="absolute inset-0 h-full w-full object-cover mix-blend-overlay opacity-90 group-hover:scale-110 transition-transform duration-700"
         src={book.coverUrl}
         alt={`Bìa sách ${book.title}`}
         loading="lazy"
       />
     ) : null}
-    <div className={`absolute inset-0 ${book.coverUrl ? 'bg-gradient-to-t from-black/70 via-black/10 to-transparent' : ''}`} />
-    <div className="absolute inset-x-0 top-0 h-2 bg-accent-600" />
-    <div className={`relative flex flex-col justify-between ${large ? 'min-h-96 p-8' : 'min-h-56 p-5'}`}>
-      <div>
-        <p className="font-mono text-xs font-bold uppercase tracking-widest text-primary-100">{book.isbn}</p>
-        <h3 className={`${large ? 'mt-8 text-4xl' : 'mt-6 text-2xl'} font-bold leading-tight text-white`}>
+    <div className={`absolute inset-0 ${book.coverUrl ? 'bg-gradient-to-t from-ink-900/90 via-ink-900/40 to-transparent' : ''}`} />
+    
+    {/* Decorative Top Accent */}
+    <div className="absolute inset-x-0 top-0 h-1.5 bg-gradient-to-r from-accent-400 to-primary-400 opacity-80" />
+    
+    <div className={`relative flex h-full flex-col justify-between ${large ? 'p-8' : 'p-5'}`}>
+      <div className="transform transition-transform duration-300 group-hover:translate-y-1">
+        <span className="inline-block rounded-md bg-white/10 px-2 py-1 font-mono text-[10px] font-bold uppercase tracking-widest text-primary-100 backdrop-blur-md border border-white/10 mb-3">
+          {book.isbn}
+        </span>
+        <h3 className={`${large ? 'text-4xl' : 'text-xl'} font-extrabold leading-tight text-white drop-shadow-md`}>
           {book.title}
         </h3>
       </div>
-      <div className="mt-8 border-t border-white/20 pt-4">
-        <p className="text-sm font-semibold text-primary-100">{book.author}</p>
-        <p className="mt-1 text-xs uppercase tracking-wide text-white/70">{book.category}</p>
+      <div className="border-t border-white/20 pt-4 mt-auto">
+        <p className="text-sm font-bold text-primary-100">{book.author}</p>
+        <p className="mt-1 text-xs font-bold uppercase tracking-widest text-white/60">{book.category}</p>
       </div>
     </div>
   </div>
@@ -42,44 +47,51 @@ const BookCard: React.FC<BookCardProps> = ({ book, onActionClick, onReserveClick
   const isDisabled = disabled || isReserved || (!isAvailable && !onReserveClick);
 
   return (
-    <article className="flex h-full flex-col rounded-lg border border-border bg-white p-4 shadow-panel">
-      <BookCover book={book} />
-
-      <div className="mb-4 mt-4 flex items-start justify-between gap-3">
-        <div>
-          <p className="font-mono text-xs font-semibold uppercase tracking-wide text-ink-500">{book.isbn}</p>
-          <h3 className="mt-1 line-clamp-2 text-lg font-bold text-ink-900" title={book.title}>
-            {book.title}
-          </h3>
-        </div>
-        <span className={isAvailable ? 'tag border-accent-100 bg-accent-50 text-accent-700' : 'tag border-red-200 bg-red-50 text-red-700'}>
-          {isAvailable ? `Còn ${book.availableCopies} cuốn` : 'Hết sách'}
+    <article className="glass-card flex h-full flex-col p-4 group relative overflow-hidden bg-white/80">
+      
+      {/* Availability Badge */}
+      <div className="absolute top-6 right-6 z-10">
+        <span className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-black shadow-sm backdrop-blur-md border ${isAvailable ? 'bg-accent-400 text-white border-accent-300' : 'bg-red-500 text-white border-red-400'}`}>
+          <span className={`h-1.5 w-1.5 rounded-full ${isAvailable ? 'bg-white animate-pulse' : 'bg-white/50'}`}></span>
+          {isAvailable ? `Còn ${book.availableCopies}` : 'Hết sách'}
         </span>
       </div>
 
-      <dl className="mb-5 space-y-2 text-sm">
-        <div>
-          <dt className="text-xs font-bold uppercase tracking-wide text-ink-500">Tác giả</dt>
-          <dd className="text-ink-800">{book.author}</dd>
-        </div>
-        <div>
-          <dt className="text-xs font-bold uppercase tracking-wide text-ink-500">Danh mục</dt>
-          <dd className="text-ink-800">{book.category}</dd>
-        </div>
-      </dl>
+      <Link to={`/san-pham/${book.id}`} className="block">
+        <BookCover book={book} />
+      </Link>
+
+      <div className="mt-5 flex-1 px-1">
+        <Link to={`/san-pham/${book.id}`} className="block mb-4">
+          <h3 className="line-clamp-2 text-lg font-extrabold text-ink-900 group-hover:text-primary-600 transition-colors" title={book.title}>
+            {book.title}
+          </h3>
+        </Link>
+
+        <dl className="space-y-2 text-sm">
+          <div className="flex items-center justify-between border-b border-ink-100/50 pb-2">
+            <dt className="text-xs font-bold uppercase tracking-widest text-ink-400">Tác giả</dt>
+            <dd className="font-semibold text-ink-800 text-right">{book.author}</dd>
+          </div>
+          <div className="flex items-center justify-between pb-2">
+            <dt className="text-xs font-bold uppercase tracking-widest text-ink-400">Danh mục</dt>
+            <dd className="font-semibold text-ink-800 text-right">{book.category}</dd>
+          </div>
+        </dl>
+      </div>
 
       {onActionClick || onReserveClick ? (
-        <div className="mt-auto grid grid-cols-2 gap-2">
-          <Link className="btn-secondary" to={`/san-pham/${book.id}`}>
-            Chi tiết
+        <div className="mt-4 grid grid-cols-2 gap-3 px-1 pb-1">
+          <Link className="btn-secondary rounded-xl py-2.5 text-xs font-black shadow-sm" to={`/san-pham/${book.id}`}>
+            Xem sách
           </Link>
           <button
-            className={isAvailable ? 'btn-primary' : 'btn-secondary'}
+            className={`rounded-xl py-2.5 text-xs font-black shadow-sm transition-all duration-300 ${isAvailable ? 'bg-gradient-to-r from-primary-600 to-accent-500 text-white hover:shadow-glow hover:scale-[1.02]' : isReserved ? 'bg-slate-200 text-slate-500' : 'bg-white border border-ink-200 text-ink-700 hover:border-primary-300 hover:text-primary-600'}`}
             type="button"
             onClick={() => (isAvailable ? onActionClick?.(book.id) : onReserveClick?.(book.id))}
             disabled={isDisabled}
           >
-            {isAvailable ? 'Mượn' : isReserved ? 'Đã đặt' : 'Đặt chỗ'}
+            {isAvailable ? 'Mượn ngay' : isReserved ? 'Đã đặt chỗ' : 'Đặt chỗ'}
           </button>
         </div>
       ) : null}

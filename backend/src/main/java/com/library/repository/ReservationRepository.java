@@ -25,4 +25,11 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     Optional<Reservation> findFirstByBook_IdAndMember_IdAndStatus(Long bookId, Long memberId, ReservationStatus status);
 
     long countByStatus(ReservationStatus status);
+    
+    @Query("SELECT r FROM Reservation r " +
+            "JOIN FETCH r.book b " +
+            "JOIN FETCH r.member m " +
+            "WHERE r.status = :status " +
+            "ORDER BY r.reservationDate ASC")
+    List<Reservation> findByStatusOrderByReservationDateAsc(@Param("status") ReservationStatus status);
 }

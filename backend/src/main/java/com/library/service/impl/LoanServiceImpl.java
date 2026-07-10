@@ -163,4 +163,51 @@ public class LoanServiceImpl implements LoanService {
     public List<Loan> getOverdueLoans() {
         return loanRepository.findOverdueUnreturnedLoans();
     }
+    
+    @Override
+    public List<Loan> getActiveLoans() {
+        return loanRepository.findByStatusOrderByLoanDateDesc(LoanStatus.ACTIVE);
+    }
+    
+    @Override
+    @Transactional
+    public Loan adminBorrowBook(String memberCode, String copyCode) {
+        Member member = memberRepository.findByMemberCode(memberCode)
+                .orElseThrow(() -> new ResourceNotFoundException("Member not found with code: " + memberCode));
+                
+        if (member.getCardExpiryDate() != null && member.getCardExpiryDate().isBefore(LocalDate.now())) {
+            throw new BusinessRuleException("Member card has expired.");
+        }
+        
+        BookCopy copy = bookCopyRepository.findByCopyCode(copyCode)
+                .orElseThrow(() -> new ResourceNotFoundException("Copy not found with code: " + copyCode));
+                
+        if (copy.getStatus() != CopyStatus.AVAILABLE) {
+            throw new BusinessRuleException("This book copy is not available.");
+        }
+        
+        copy.setStatus(CopyStatus.LOANED);
+        bookCopyRepository.save(copy);
+        
+        LocalDateTime now = LocalDateTime.now();
+        Loan newLoan = Loan.builder()
+                .member(member)
+                .bookCopy(copy)
+                .loanDate(now)
+                .dueDate(now.plusDays(LOAN_DAYS_LIMIT))
+                .status(LoanStatus.ACTIVE)
+                .renewalCount(0)
+                .build();
+                
+        return loanRepository.save(newLoan);
+    }
+    
+    @Override
+    @Transactional
+    public Loan adminReturnBook(String copyCode) {
+        Loan loan = loanRepository.findFirstByBookCopy_CopyCodeAndStatus(copyCode, LoanStatus.ACTIVE)
+                .orElseThrow(() -> new BusinessRuleException("No active loan found for copy code: " + copyCode));
+                
+        return returnBook(loan.getId());
+    }
 }

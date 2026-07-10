@@ -11,7 +11,7 @@ export const useReserveBook = () => {
 
   return useMutation({
     mutationFn: async (request: ReserveBookRequest) => {
-      const response = await apiClient.post('/user/reservations', request);
+      const response = await apiClient.post('/reservations', request);
       return response.data;
     },
     onSuccess: () => {
@@ -26,7 +26,7 @@ export const useMyReservations = () => {
     queryKey: ['reservations'],
     enabled: Boolean(localStorage.getItem('accessToken')),
     queryFn: async () => {
-      const { data } = await apiClient.get<ReservationResponse[]>('/user/reservations');
+      const { data } = await apiClient.get<ReservationResponse[]>('/reservations/my-reservations');
       return data;
     },
   });

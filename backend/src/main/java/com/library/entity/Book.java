@@ -45,6 +45,9 @@ public class Book {
     @Column(columnDefinition = "TEXT")
     private String description;
 
+    @Column(name = "cover_url", length = 500)
+    private String coverUrl;
+
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;

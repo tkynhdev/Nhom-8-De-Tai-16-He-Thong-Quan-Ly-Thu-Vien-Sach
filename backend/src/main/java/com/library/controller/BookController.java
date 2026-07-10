@@ -38,4 +38,29 @@ public class BookController {
         Page<BookSearchResponse> result = bookService.searchBooks(title, author, category, isbn, PageRequest.of(page, size));
         return ResponseEntity.ok(result);
     }
+
+    @Operation(summary = "Create a book")
+    @org.springframework.security.access.prepost.PreAuthorize("hasAnyRole('LIBRARIAN', 'ADMIN')")
+    @io.swagger.v3.oas.annotations.security.SecurityRequirement(name = "bearerAuth")
+    @org.springframework.web.bind.annotation.PostMapping
+    public ResponseEntity<BookSearchResponse> createBook(@jakarta.validation.Valid @org.springframework.web.bind.annotation.RequestBody com.library.dto.BookRequest request) {
+        return ResponseEntity.status(org.springframework.http.HttpStatus.CREATED).body(bookService.createBook(request));
+    }
+
+    @Operation(summary = "Update a book")
+    @org.springframework.security.access.prepost.PreAuthorize("hasAnyRole('LIBRARIAN', 'ADMIN')")
+    @io.swagger.v3.oas.annotations.security.SecurityRequirement(name = "bearerAuth")
+    @org.springframework.web.bind.annotation.PutMapping("/{id}")
+    public ResponseEntity<BookSearchResponse> updateBook(@org.springframework.web.bind.annotation.PathVariable Long id, @jakarta.validation.Valid @org.springframework.web.bind.annotation.RequestBody com.library.dto.BookRequest request) {
+        return ResponseEntity.ok(bookService.updateBook(id, request));
+    }
+
+    @Operation(summary = "Delete a book")
+    @org.springframework.security.access.prepost.PreAuthorize("hasAnyRole('LIBRARIAN', 'ADMIN')")
+    @io.swagger.v3.oas.annotations.security.SecurityRequirement(name = "bearerAuth")
+    @org.springframework.web.bind.annotation.DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteBook(@org.springframework.web.bind.annotation.PathVariable Long id) {
+        bookService.deleteBook(id);
+        return ResponseEntity.noContent().build();
+    }
 }

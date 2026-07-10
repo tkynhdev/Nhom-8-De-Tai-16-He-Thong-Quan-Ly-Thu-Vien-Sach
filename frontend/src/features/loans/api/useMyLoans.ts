@@ -7,7 +7,7 @@ export const useMyLoans = () => {
     queryKey: ['my-loans'],
     enabled: Boolean(localStorage.getItem('accessToken')),
     queryFn: async (): Promise<LoanResponse[]> => {
-      const { data } = await apiClient.get('/member/loans');
+      const { data } = await apiClient.get('/loans/my-loans');
       return data;
     },
   });

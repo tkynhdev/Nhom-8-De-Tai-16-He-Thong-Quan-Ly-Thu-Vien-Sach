@@ -40,6 +40,15 @@ public interface LoanRepository extends JpaRepository<Loan, Long> {
 
     long countByStatus(LoanStatus status);
 
+    @Query("SELECT DISTINCT l FROM Loan l " +
+            "JOIN FETCH l.bookCopy bc " +
+            "JOIN FETCH bc.book " +
+            "JOIN FETCH l.member " +
+            "WHERE l.status = :status " +
+            "ORDER BY l.loanDate DESC")
+    List<Loan> findByStatusOrderByLoanDateDesc(@Param("status") LoanStatus status);
+    
+    Optional<Loan> findFirstByBookCopy_CopyCodeAndStatus(String copyCode, LoanStatus status);
     @Query("SELECT new com.library.dto.PopularBookResponse(b.title, COUNT(l)) " +
             "FROM Loan l JOIN l.bookCopy bc JOIN bc.book b " +
             "GROUP BY b.title " +

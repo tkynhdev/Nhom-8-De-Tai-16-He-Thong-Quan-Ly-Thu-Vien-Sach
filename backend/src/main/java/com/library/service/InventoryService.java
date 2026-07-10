@@ -10,4 +10,10 @@ import java.util.List;
 public interface InventoryService {
 
     List<BookCopyResponse> getAllCopies();
+    
+    BookCopyResponse createCopy(com.library.dto.BookCopyRequest request);
+    
+    BookCopyResponse updateCopy(Long id, com.library.dto.BookCopyRequest request);
+    
+    void deleteCopy(Long id);
 }

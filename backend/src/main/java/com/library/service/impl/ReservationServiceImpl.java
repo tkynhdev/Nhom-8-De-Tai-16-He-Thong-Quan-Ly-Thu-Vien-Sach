@@ -72,10 +72,19 @@ public class ReservationServiceImpl implements ReservationService {
                 .orElseThrow(() -> new ResourceNotFoundException("Reservation not found with ID: " + reservationId));
 
         if (!reservation.getMember().getId().equals(memberId)) {
-            throw new BusinessRuleException("Reservation does not belong to the authenticated member.");
+            throw new BusinessRuleException("You can only cancel your own reservations.");
+        }
+
+        if (reservation.getStatus() != ReservationStatus.PENDING) {
+            throw new BusinessRuleException("Only pending reservations can be cancelled.");
         }
 
         reservation.setStatus(ReservationStatus.CANCELLED);
         return reservationRepository.save(reservation);
+    }
+    
+    @Override
+    public List<Reservation> getPendingReservations() {
+        return reservationRepository.findByStatusOrderByReservationDateAsc(ReservationStatus.PENDING);
     }
 }

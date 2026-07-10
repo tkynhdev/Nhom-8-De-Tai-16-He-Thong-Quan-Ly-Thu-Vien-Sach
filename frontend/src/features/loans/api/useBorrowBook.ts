@@ -2,8 +2,8 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import apiClient from '../../../lib/apiClient';
 import { BorrowRequest, LoanResponse } from '../../../types/api';
 
-const borrowBook = async (payload: BorrowRequest): Promise<LoanResponse> => {
-  const { data } = await apiClient.post('/member/loans/borrow', payload);
+export const borrowBook = async (payload: { bookId: number }): Promise<LoanResponse> => {
+  const { data } = await apiClient.post('/loans/borrow', payload);
   return data;
 };
 

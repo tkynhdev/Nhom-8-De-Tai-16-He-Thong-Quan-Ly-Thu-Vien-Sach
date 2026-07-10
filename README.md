@@ -1,101 +1,109 @@
-# LibSys
+# Hệ thống Quản lý Thư viện Sách (Fullstack)
 
-Library management system with Spring Boot, PostgreSQL, React, and Docker.
+Dự án này là hệ thống thư viện số hỗ trợ quản lý kho sách, đăng ký mượn sách, theo dõi thời hạn trả và tính phí phạt trễ hạn.
 
-## Run with Docker
+## ERD (Sơ đồ Cơ sở Dữ liệu)
 
-Create local environment config:
-
-```bash
-cp .env.example .env
+```mermaid
+erDiagram
+    books {
+        bigserial id PK
+        varchar isbn "UK"
+        varchar title
+        varchar author
+        varchar category
+        varchar publisher
+        text description
+        varchar cover_url
+        timestamp created_at
+        timestamp updated_at
+    }
+    
+    book_copies {
+        bigserial id PK
+        bigint book_id FK
+        varchar copy_code "UK"
+        varchar status "AVAILABLE, LOANED, RESERVED, LOST"
+        varchar shelf_location
+        timestamp created_at
+        timestamp updated_at
+    }
+    
+    members {
+        bigserial id PK
+        varchar member_code "UK"
+        varchar full_name
+        varchar email "UK"
+        varchar phone "UK"
+        varchar role "MEMBER, LIBRARIAN, ADMIN"
+        varchar card_type "STANDARD, PREMIUM"
+        date card_expiry_date
+        timestamp created_at
+        timestamp updated_at
+    }
+    
+    loans {
+        bigserial id PK
+        bigint member_id FK
+        bigint book_copy_id FK
+        timestamp loan_date
+        timestamp due_date
+        timestamp return_date
+        varchar status "ACTIVE, RETURNED"
+        integer renewal_count
+    }
+    
+    reservations {
+        bigserial id PK
+        bigint member_id FK
+        bigint book_id FK
+        timestamp reservation_date
+        varchar status "PENDING, FULFILLED, CANCELLED"
+    }
+    
+    fines {
+        bigserial id PK
+        bigint loan_id FK
+        numeric amount
+        varchar status "UNPAID, PAID, WAIVED"
+        varchar reason
+        timestamp created_at
+    }
+    
+    books ||--o{ book_copies : "has"
+    book_copies ||--o{ loans : "borrowed as"
+    members ||--o{ loans : "borrows"
+    books ||--o{ reservations : "reserved"
+    members ||--o{ reservations : "reserves"
+    loans ||--o{ fines : "generates"
 ```
 
-Start the stack:
+## Yêu cầu Hệ thống
+- JDK 21+
+- Node.js 18+
+- PostgreSQL 15+
+- Maven (cho backend)
 
-```bash
-docker compose up --build
-```
+## Hướng dẫn cài đặt Backend
+1. Mở thư mục `backend`
+2. Cấu hình file `src/main/resources/application.yml` (hoặc tạo file `.env` tham chiếu tới DB PostgreSQL)
+3. Chạy `.\mvnw.cmd spring-boot:run`
+4. Flyway sẽ tự động chạy các file SQL Migration và khởi tạo schema cũng như dữ liệu mẫu (admin: member/member123, librarian: lib/lib123, member: member/member123).
+5. API chạy ở cổng `8080` (Swagger UI: `http://localhost:8080/swagger-ui.html`)
 
-Before production, change `POSTGRES_PASSWORD` and `JWT_SECRET` in `.env`.
-If frontend and backend use different domains, set `CORS_ALLOWED_ORIGINS`.
-Set `SPRINGDOC_ENABLED=false` to hide Swagger/OpenAPI in production.
+## Hướng dẫn cài đặt Frontend
+1. Mở thư mục `frontend`
+2. Chạy `npm install`
+3. Chạy `npm run dev`
+4. Truy cập `http://localhost:5173`
+5. Bạn có thể đăng nhập bằng mã thẻ:
+   - Admin: `admin` (Mật khẩu bất kỳ do BE không kiểm tra)
+   - Librarian: `librarian`
+   - Member: `member`
 
-If your machine has the older Compose CLI:
-
-```bash
-docker-compose up --build
-```
-
-Open:
-
-```text
-Frontend: http://localhost:3000
-Backend:  http://localhost:8080
-Swagger:  http://localhost:8080/swagger-ui.html
-```
-
-Stop:
-
-```bash
-docker compose down
-```
-
-Reset the local database:
-
-```bash
-docker compose down -v
-```
-
-Backup and restore the database:
-
-```powershell
-.\scripts\backup-db.ps1
-.\scripts\restore-db.ps1 .\backups\library-YYYYMMDD-HHMMSS.sql
-```
-
-## Local Development
-
-Backend:
-
-```bash
-cd backend
-mvn test
-mvn spring-boot:run
-```
-
-Requires JDK 21 and Maven 3.9+.
-
-Frontend:
-
-```bash
-cd frontend
-npm install
-npm run dev
-```
-
-Requires Node.js 20+.
-
-Default frontend API base URL:
-
-```text
-http://localhost:8080/api/v1
-```
-
-## Role Areas
-
-```text
-MEMBER:    /member
-LIBRARIAN: /librarian
-ADMIN:     /admin
-```
-
-Backend still enforces role access. Frontend routes are only the user experience layer.
-
-Admin settings for fines, loan period, and renewal limits are stored in the database.
-
-Seed login:
-
-```text
-member / member123
-admin  / admin123
-```
+## Các tính năng chính
+1. **Quản lý Thành viên**: Thêm/Sửa/Xoá, phân quyền RBAC.
+2. **Quản lý Sách và Kho**: Quản lý đầu mục sách, quản lý các bản sao (Book copies).
+3. **Mượn/Trả sách**: Nghiệp vụ quản lý phiếu mượn, kiểm tra tự động phát sinh Fine (phí phạt) khi quá hạn.
+4. **Đặt chỗ**: Đặt chỗ (Reservation) sách đã hết và tự động thông báo/chuyển trạng thái khi có người trả sách.
+5. **Thống kê**: Bảng điều khiển (Dashboard) cho thủ thư và quản trị viên, xuất file CSV.
