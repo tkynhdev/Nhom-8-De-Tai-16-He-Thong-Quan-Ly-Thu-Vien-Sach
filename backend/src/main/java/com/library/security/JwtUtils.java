@@ -14,6 +14,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 
+/**
+ * Creates and validates JWT access/refresh tokens for authenticated members.
+ */
 @Component
 public class JwtUtils {
 
@@ -44,11 +47,16 @@ public class JwtUtils {
     }
 
     public String generateToken(Map<String, Object> extraClaims, UserDetails userDetails) {
+        extraClaims.putIfAbsent("tokenType", "ACCESS");
+        extraClaims.putIfAbsent("roles", userDetails.getAuthorities().stream().map(Object::toString).toList());
         return buildToken(extraClaims, userDetails, jwtExpiration);
     }
 
     public String generateRefreshToken(UserDetails userDetails) {
-        return buildToken(new HashMap<>(), userDetails, refreshExpiration);
+        Map<String, Object> extraClaims = new HashMap<>();
+        extraClaims.put("tokenType", "REFRESH");
+        extraClaims.put("roles", userDetails.getAuthorities().stream().map(Object::toString).toList());
+        return buildToken(extraClaims, userDetails, refreshExpiration);
     }
 
     private String buildToken(Map<String, Object> extraClaims, UserDetails userDetails, long expiration) {
@@ -64,6 +72,11 @@ public class JwtUtils {
     public boolean isTokenValid(String token, UserDetails userDetails) {
         final String username = extractUsername(token);
         return username.equals(userDetails.getUsername()) && !isTokenExpired(token);
+    }
+
+    public boolean isRefreshToken(String token) {
+        Object tokenType = extractClaim(token, claims -> claims.get("tokenType"));
+        return "REFRESH".equals(tokenType);
     }
 
     private boolean isTokenExpired(String token) {

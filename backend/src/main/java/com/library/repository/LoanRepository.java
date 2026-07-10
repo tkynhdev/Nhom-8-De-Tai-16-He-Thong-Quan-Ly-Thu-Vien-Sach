@@ -1,6 +1,10 @@
 package com.library.repository;
 
+import com.library.dto.MemberActivityResponse;
+import com.library.dto.PopularBookResponse;
 import com.library.entity.Loan;
+import com.library.enums.LoanStatus;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -23,6 +27,20 @@ public interface LoanRepository extends JpaRepository<Loan, Long> {
            "JOIN FETCH l.bookCopy bc " +
            "JOIN FETCH bc.book " +
            "JOIN FETCH l.member " +
-           "WHERE l.status = 'ACTIVE' AND l.dueDate < CURRENT_TIMESTAMP")
+           "WHERE l.status = com.library.enums.LoanStatus.ACTIVE AND l.dueDate < CURRENT_TIMESTAMP")
     List<Loan> findOverdueUnreturnedLoans();
+
+    long countByStatus(LoanStatus status);
+
+    @Query("SELECT new com.library.dto.PopularBookResponse(b.title, COUNT(l)) " +
+            "FROM Loan l JOIN l.bookCopy bc JOIN bc.book b " +
+            "GROUP BY b.title " +
+            "ORDER BY COUNT(l) DESC")
+    List<PopularBookResponse> findPopularBooks(Pageable pageable);
+
+    @Query("SELECT new com.library.dto.MemberActivityResponse(m.memberCode, m.fullName, COUNT(l)) " +
+            "FROM Loan l JOIN l.member m " +
+            "GROUP BY m.memberCode, m.fullName " +
+            "ORDER BY COUNT(l) DESC")
+    List<MemberActivityResponse> findTopMembers(Pageable pageable);
 }

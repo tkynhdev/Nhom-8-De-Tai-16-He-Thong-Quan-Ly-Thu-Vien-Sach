@@ -1,6 +1,7 @@
 package com.library.entity;
 
 import com.library.enums.CardType;
+import com.library.enums.UserRole;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.Future;
@@ -46,6 +47,12 @@ public class Member {
     @Enumerated(EnumType.STRING)
     @Column(name = "card_type", nullable = false, length = 20)
     private CardType cardType;
+
+    @NotNull(message = "Role cannot be null")
+    @Enumerated(EnumType.STRING)
+    @Column(name = "role", nullable = false, length = 20)
+    @Builder.Default
+    private UserRole role = UserRole.MEMBER;
 
     @NotNull(message = "Card expiry date cannot be null")
     @Future(message = "Card expiry date must be in the future")

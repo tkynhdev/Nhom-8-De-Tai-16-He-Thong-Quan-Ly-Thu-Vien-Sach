@@ -15,6 +15,9 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * Searches books and enriches each result with available-copy counts.
+ */
 @Service
 @RequiredArgsConstructor
 public class BookServiceImpl implements BookService {
@@ -26,6 +29,9 @@ public class BookServiceImpl implements BookService {
     public Page<BookSearchResponse> searchBooks(String title, String author, String category, String isbn, Pageable pageable) {
         List<Book> books = bookRepository.searchBooks(title, author, category, isbn);
         int start = (int) pageable.getOffset();
+        if (start >= books.size()) {
+            return new PageImpl<>(List.of(), pageable, books.size());
+        }
         int end = Math.min(start + pageable.getPageSize(), books.size());
         List<BookSearchResponse> content = books.subList(start, end).stream()
                 .map(book -> BookSearchResponse.builder()
